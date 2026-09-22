@@ -1,0 +1,17 @@
+{
+  "name": "dong-skills",
+  "owner": {
+    "name": "Dongyeon Yu",
+    "url": "https://github.com/easydong19"
+  },
+  "description": "유동연의 Claude Code 스킬 모음 — 기술 문서 작성·리뷰, 데일리 스크럼, QA 리포트, 학습 자료 생성.",
+  "plugins": [
+    {
+      "name": "dong-skills",
+      "source": "./",
+      "description": "기술 문서 작성 파이프라인(유형 결정·구조 리뷰·문장 윤문·도메인 설명), 데일리 스크럼 메모, QA 리포트, 학습용 HTML·A4 요약본 스킬.",
+      "category": "productivity",
+      "keywords": ["skills", "technical-writing", "documentation", "daily-scrum", "qa-report", "study", "korean"]
+    }
+  ]
+}

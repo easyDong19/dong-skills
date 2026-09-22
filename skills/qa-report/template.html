@@ -1,0 +1,456 @@
+<title><!--TITLE--></title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --paper: #ffffff; --ground: #ececea; --ink: #141414; --ink-2: #454545; --ink-3: #7a7a7a;
+    --rule: #c9c9c6; --rule-soft: #e3e3e0; --tint: #f4f4f2;
+    --serif: "Noto Serif KR", "Apple SD Gothic Neo", serif;
+    --sans: "Noto Sans KR", "Apple SD Gothic Neo", -apple-system, system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --w: 186mm;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #1b1b1a; --ground: #0f0f0e; --ink: #ececea; --ink-2: #bdbdb9; --ink-3: #8b8b87;
+      --rule: #4a4a47; --rule-soft: #2e2e2c; --tint: #242423;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #1b1b1a; --ground: #0f0f0e; --ink: #ececea; --ink-2: #bdbdb9; --ink-3: #8b8b87;
+    --rule: #4a4a47; --rule-soft: #2e2e2c; --tint: #242423;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font-family: var(--sans); font-size: 14px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  .sheet { background: var(--paper); max-width: var(--w); margin: 0 auto 24px; padding-block: 12mm 18mm; padding-inline: clamp(16px, 4vw, 12mm); box-shadow: 0 1px 0 var(--rule), 0 12px 32px -20px rgba(0,0,0,.35); }
+  code, .mono { font-family: var(--mono); font-size: .92em; }
+  a { color: inherit; }
+  button { font: inherit; }
+  .runhead { display: none; }
+
+  /* ── 검토 상태 바 (화면 전용) ── */
+  .bar-top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--paper); border-bottom: 1px solid var(--rule); }
+  .bar-in { max-width: var(--w); margin: 0 auto; padding: 8px clamp(16px, 4vw, 12mm); display: flex; gap: 10px 16px; align-items: center; flex-wrap: wrap; font-size: 12.5px; }
+  .bar-in .st { display: flex; align-items: center; gap: 8px; color: var(--ink-2); flex: 1; min-width: 12em; }
+  .bar-in .dot { width: 8px; height: 8px; border: 1px solid var(--ink); border-radius: 50%; background: var(--paper); }
+  .bar-in .dot.dirty { background: var(--ink); }
+  .bar-in .prog { font-family: var(--mono); color: var(--ink-3); }
+  .bar-in .acts { display: flex; gap: 8px; }
+  .btn { padding: 6px 12px; border: 1px solid var(--ink); background: var(--paper); color: var(--ink); cursor: pointer; font-size: 12.5px; }
+  .btn.primary { background: var(--ink); color: var(--paper); }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .btn:focus-visible, input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  /* ── 머리말 ── */
+  .head { display: grid; grid-template-columns: 1fr auto; gap: 16px 24px; align-items: start; padding-bottom: 14px; border-bottom: 2px solid var(--ink); }
+  .kicker { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; color: var(--ink-3); margin: 0 0 6px; text-transform: uppercase; }
+  h1 { font-family: var(--serif); font-weight: 700; font-size: 26px; line-height: 1.25; letter-spacing: -.01em; margin: 0 0 6px; text-wrap: balance; }
+  .sub { margin: 0; color: var(--ink-2); font-size: 13.5px; }
+  .sub b { color: var(--ink); font-family: var(--mono); font-weight: 500; }
+  .stamp { border: 2px solid var(--ink); padding: 8px 14px; min-width: 128px; text-align: center; font-family: var(--serif); font-weight: 700; font-size: 18px; line-height: 1.2; }
+  .stamp small { display: block; font-family: var(--mono); font-weight: 400; font-size: 10px; letter-spacing: .08em; color: var(--ink-3); margin-bottom: 4px; }
+  .stamp[data-d="pending"] { border-style: dashed; color: var(--ink-3); }
+  .stamp[data-d="rejected"] { background: var(--ink); color: var(--paper); }
+  .stamp[data-d="rejected"] small { color: var(--paper); opacity: .7; }
+  @media (max-width: 560px) { .head { grid-template-columns: 1fr; } .stamp { justify-self: start; } }
+  .meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 18px; padding: 12px 0; border-bottom: 1px solid var(--rule); font-size: 13px; margin: 0; }
+  .meta div { display: grid; grid-template-columns: 3.5em 1fr; gap: 6px; align-items: baseline; }
+  .meta dt { color: var(--ink-3); font-size: 11.5px; }
+  .meta dd { margin: 0; overflow-wrap: anywhere; }
+  @media (max-width: 720px) { .meta { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 460px) { .meta { grid-template-columns: 1fr; } }
+
+  h2 { font-family: var(--serif); font-size: 16px; font-weight: 700; margin: 26px 0 10px; padding-bottom: 5px; border-bottom: 1px solid var(--ink); display: flex; align-items: baseline; gap: 10px; }
+  h2 .n { font-family: var(--mono); font-weight: 400; font-size: 11px; color: var(--ink-3); letter-spacing: .06em; }
+
+  /* ── 한눈에 ── */
+  .glance { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 28px; }
+  @media (max-width: 640px) { .glance { grid-template-columns: 1fr; } }
+  .bar { display: flex; height: 16px; border: 1px solid var(--ink); overflow: hidden; }
+  .bar span { display: block; height: 100%; border-right: 1px solid var(--ink); }
+  .bar span:last-child { border-right: 0; }
+  .fill-pass { background: var(--ink); }
+  .fill-fail { background: repeating-linear-gradient(135deg, var(--ink) 0 2px, var(--paper) 2px 5px); }
+  .fill-blocked { background: radial-gradient(var(--ink) 1px, transparent 1.2px) 0 0 / 4px 4px; }
+  .fill-na { background: var(--paper); }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 8px; font-size: 12.5px; }
+  .legend div { display: flex; align-items: center; gap: 7px; white-space: nowrap; }
+  .legend .all { flex-basis: 100%; color: var(--ink-3); }
+  .legend i { display: inline-block; width: 14px; height: 10px; border: 1px solid var(--ink); }
+  .legend b { font-family: var(--mono); font-weight: 500; margin-left: 2px; }
+  .legend .z { color: var(--ink-3); }
+  .scope h3 { font-size: 12px; margin: 0 0 4px; color: var(--ink-3); font-weight: 500; }
+  .scope ul { margin: 0 0 10px; padding-left: 1.1em; }
+  .scope li { margin: 1px 0; }
+
+  /* ── 먼저 볼 것 ── */
+  .attn { border: 1px solid var(--ink); }
+  .attn .row { display: grid; grid-template-columns: 22px 5.2em 1fr; gap: 8px 10px; padding: 9px 12px; border-top: 1px solid var(--rule-soft); align-items: baseline; break-inside: avoid; }
+  .attn .row:first-child { border-top: 0; }
+  .attn .g { font-size: 15px; line-height: 1; }
+  .attn .id { font-family: var(--mono); font-size: 12px; color: var(--ink-2); }
+  .attn .t { font-weight: 700; }
+  .attn .why { color: var(--ink-2); }
+  .attn .how { color: var(--ink-3); font-size: 12.5px; }
+  @media (max-width: 460px) { .attn .row { grid-template-columns: 22px 1fr; } .attn .id { grid-column: 2; } }
+
+  /* ── 케이스 ── */
+  .feature { margin-top: 18px; }
+  .feature h3 { font-size: 14px; font-weight: 700; margin: 0 0 4px; display: flex; gap: 8px; align-items: baseline; }
+  .feature h3 .cnt { font-family: var(--mono); font-weight: 400; font-size: 11px; color: var(--ink-3); }
+  .feature .fnote { margin: 0 0 10px; color: var(--ink-2); font-size: 13px; }
+  .case { display: grid; grid-template-columns: minmax(0, 1fr) 74mm; gap: 8px 14px; border: 1px solid var(--rule); border-left: 3px solid var(--rule); padding: 10px 12px; margin-bottom: 10px; break-inside: avoid; page-break-inside: avoid; }
+  .case[data-s="fail"] { border-color: var(--ink); border-left-width: 5px; }
+  .case[data-s="blocked"] { border-style: dashed; border-left-style: solid; border-left-color: var(--ink-2); }
+  .case.portrait { grid-template-columns: minmax(0, 1fr) 46mm; }
+  @media (max-width: 640px) { .case, .case.portrait { grid-template-columns: 1fr; } .case .ev { order: -1; } }
+  .case .top { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; grid-column: 1 / -1; }
+  .case .g { font-size: 15px; line-height: 1; width: 16px; text-align: center; }
+  .case .no { font-family: var(--mono); font-size: 12px; color: var(--ink-3); }
+  .case .title { font-weight: 700; font-size: 14.5px; }
+  .case[data-s="fail"] .title { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+  .case .st { font-size: 11.5px; padding: 1px 7px; border: 1px solid var(--ink); font-weight: 500; margin-left: auto; white-space: nowrap; }
+  .case[data-s="fail"] .st { background: var(--ink); color: var(--paper); }
+  .gwt { display: grid; grid-template-columns: 4em 1fr; gap: 3px 8px; font-size: 13px; align-content: start; margin: 0; }
+  .gwt dt { color: var(--ink-3); font-size: 11.5px; padding-top: 2px; }
+  .gwt dd { margin: 0; }
+  .gwt dd.expect { font-weight: 500; }
+  .gwt dd.actual .ok { color: var(--ink-3); }
+  .gwt dd.actual .ng { font-weight: 700; }
+  .gwt ol { margin: 0; padding-left: 1.2em; }
+  .ev { align-self: start; }
+  .ev img { display: block; width: 100%; height: auto; border: 1px solid var(--rule); background: var(--tint); }
+  .ev .cap { font-size: 11px; color: var(--ink-3); margin-top: 3px; display: flex; justify-content: space-between; gap: 8px; }
+  .ev .none { border: 1px dashed var(--rule); aspect-ratio: 16 / 10; display: grid; place-items: center; text-align: center; color: var(--ink-3); font-size: 12px; padding: 12px; }
+  .rv { grid-column: 1 / -1; display: grid; grid-template-columns: auto 1fr; gap: 10px 16px; align-items: center; border-top: 1px dotted var(--rule); padding-top: 8px; font-size: 12.5px; }
+  .rv .opts { display: flex; gap: 14px; white-space: nowrap; }
+  .rv label { display: inline-flex; gap: 5px; align-items: center; cursor: pointer; }
+  .rv input[type=radio] { width: 14px; height: 14px; margin: 0; accent-color: var(--ink); }
+  .rv .memo { border: 0; border-bottom: 1px solid var(--rule); background: transparent; color: var(--ink); font: inherit; font-size: 12.5px; padding: 3px 0; width: 100%; min-width: 0; }
+  .rv .memo:focus { outline: none; border-bottom-color: var(--ink); }
+  .case[data-v="fix"] .rv { border-top-style: solid; border-top-color: var(--ink); }
+  @media (max-width: 460px) { .rv { grid-template-columns: 1fr; } }
+
+  /* ── 판정 ── */
+  .verdict { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 28px; }
+  @media (max-width: 640px) { .verdict { grid-template-columns: 1fr; } }
+  .crit { margin: 0; padding: 0; list-style: none; }
+  .crit li { display: grid; grid-template-columns: 18px 1fr; gap: 8px; padding: 4px 0; border-bottom: 1px solid var(--rule-soft); font-size: 13px; }
+  .crit .box { width: 13px; height: 13px; border: 1px solid var(--ink); margin-top: 3px; position: relative; }
+  .crit .box.on::after { content: ""; position: absolute; inset: 2px; background: var(--ink); }
+  .crit .auto { color: var(--ink-3); font-size: 11.5px; }
+  .dec { display: grid; gap: 6px; }
+  .dec label { display: grid; grid-template-columns: 16px 1fr; gap: 10px; align-items: start; padding: 8px 10px; border: 1px solid var(--rule); cursor: pointer; }
+  .dec label:has(input:checked) { border-color: var(--ink); border-width: 2px; padding: 7px 9px; }
+  .dec input { margin: 4px 0 0; accent-color: var(--ink); }
+  .dec b { display: block; font-size: 13.5px; }
+  .dec span { font-size: 12px; color: var(--ink-2); }
+  .sign { display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 16px; margin-top: 14px; }
+  .sign label { display: block; border-bottom: 1px solid var(--ink); padding: 14px 0 2px; font-size: 11.5px; color: var(--ink-3); }
+  .sign input { display: block; width: 100%; border: 0; background: transparent; color: var(--ink); font: inherit; font-size: 13.5px; padding: 2px 0; }
+  .sign input:focus { outline: none; }
+  @media (max-width: 460px) { .sign { grid-template-columns: 1fr; } }
+  .hist { margin-top: 14px; font-size: 12.5px; }
+  .hist h4 { margin: 0 0 4px; font-size: 12px; color: var(--ink-3); font-weight: 500; }
+  .hist ol { margin: 0; padding-left: 1.2em; }
+  .hist li { margin: 2px 0; }
+  .hist .mono { color: var(--ink-2); }
+
+  /* ── YAML 미리보기 (화면 전용) ── */
+  .yaml { margin-top: 14px; border: 1px solid var(--rule); background: var(--tint); }
+  .yaml summary { cursor: pointer; padding: 8px 12px; font-size: 12.5px; color: var(--ink-2); }
+  .yaml pre { margin: 0; padding: 10px 12px; border-top: 1px solid var(--rule-soft); font-family: var(--mono); font-size: 12px; line-height: 1.5; overflow-x: auto; white-space: pre; }
+
+  .appx { color: var(--ink-2); font-size: 12.5px; }
+  .appx dl { display: grid; grid-template-columns: 6.5em 1fr; gap: 4px 12px; margin: 0; }
+  .appx dt { color: var(--ink-3); }
+  .appx dd { margin: 0; overflow-wrap: anywhere; }
+  .appx code { background: var(--tint); padding: 1px 5px; border: 1px solid var(--rule-soft); }
+  .note { margin-top: 20px; padding: 10px 12px; border: 1px dashed var(--rule); font-size: 12px; color: var(--ink-2); }
+  .foot { margin-top: 28px; padding-top: 8px; border-top: 1px solid var(--rule); font-size: 11px; color: var(--ink-3); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: var(--mono); }
+  .toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 8px 14px; font-size: 12.5px; z-index: 9; }
+
+  @page { size: A4; margin: 14mm 12mm 20mm; }
+  @media print {
+    :root { --paper: #fff; --ground: #fff; --ink: #000; --ink-2: #222; --ink-3: #555; --rule: #999; --rule-soft: #ccc; --tint: #f2f2f2; }
+    body { background: #fff; font-size: 10.5pt; }
+    .sheet { max-width: none; margin: 0; padding: 0; box-shadow: none; }
+    .bar-top, .screen-only, .toast { display: none !important; }
+    .runhead { display: flex; position: fixed; top: auto; bottom: -13mm; left: 0; right: 0; justify-content: space-between; font-family: var(--mono); font-size: 8pt; color: #555; }
+    h1 { font-size: 20pt; }
+    h2 { font-size: 12.5pt; break-after: avoid; margin-top: 16pt; }
+    .feature h3 { break-after: avoid; }
+    .case, .attn .row, .verdict, .glance { break-inside: avoid; page-break-inside: avoid; }
+    .ev img { filter: grayscale(1) contrast(1.05); }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+
+<div class="bar-top screen-only">
+  <div class="bar-in">
+    <div class="st"><span class="dot" id="dot"></span><span id="status">불러오는 중</span></div>
+    <span class="prog" id="prog"></span>
+    <div class="acts">
+      <button type="button" class="btn" id="btn-copy">YAML 복사</button>
+      <button type="button" class="btn" id="btn-print">인쇄</button>
+      <button type="button" class="btn primary" id="btn-save">검토 저장</button>
+    </div>
+  </div>
+</div>
+
+<article class="sheet">
+  <div class="runhead" id="runhead"></div>
+  <header class="head" id="head"></header>
+  <dl class="meta" id="meta"></dl>
+
+  <section>
+    <h2>한눈에 <span class="n">SUMMARY</span></h2>
+    <div class="glance">
+      <div><div class="bar" id="bar" role="img" aria-label="상태 분포"></div><div class="legend" id="legend"></div></div>
+      <div class="scope" id="scope"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>먼저 볼 것 <span class="n">NEEDS ATTENTION</span></h2>
+    <div class="attn" id="attn"></div>
+  </section>
+
+  <section>
+    <h2>케이스별 확인 <span class="n">CASES</span></h2>
+    <div id="cases"></div>
+  </section>
+
+  <section>
+    <h2>판정 <span class="n">SIGN-OFF</span></h2>
+    <div class="verdict">
+      <div><ul class="crit" id="crit"></ul></div>
+      <div class="dec" id="dec"></div>
+    </div>
+    <div class="sign">
+      <label>검토자<input type="text" id="by" placeholder="이름"></label>
+      <label>저장 일시<input type="text" id="at" readonly placeholder="저장 시 자동"></label>
+      <label>비고<input type="text" id="note" placeholder="조건부 승인이면 남은 항목 담당·기한"></label>
+    </div>
+    <div class="hist" id="hist"></div>
+    <details class="yaml screen-only" id="yamlbox">
+      <summary>저장될 review.yaml 미리보기 (LLM은 이것만 읽는다)</summary>
+      <pre id="yaml"></pre>
+    </details>
+  </section>
+
+  <section class="appx">
+    <h2>부록 <span class="n">APPENDIX</span></h2>
+    <dl id="appx"></dl>
+    <div class="note" id="note-box"></div>
+  </section>
+  <div class="foot" id="foot"></div>
+</article>
+
+<script type="application/json" id="report-data"><!--REPORT_JSON--></script>
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   데이터 경계
+   - report.json  : 캡처 도구가 만든다. 이 페이지는 그것을 그릴 뿐이다.
+   - review.yaml  : 사람이 만든다. "검토 저장"을 눌렀을 때만 확정된다.
+   - 초안(draft)  : 클릭할 때마다 조용히 저장. LLM은 읽지 않는다.
+   ═══════════════════════════════════════════════════════════════ */
+const REPORT = JSON.parse(document.getElementById("report-data").textContent);
+const ALL = REPORT.features.flatMap(f => f.cases);
+const STATUS = {
+  pass:    { glyph: "●", label: "통과",   fill: "fill-pass" },
+  fail:    { glyph: "✕", label: "실패",   fill: "fill-fail" },
+  blocked: { glyph: "◐", label: "막힘",   fill: "fill-blocked" },
+  na:      { glyph: "○", label: "미검증", fill: "fill-na" }
+};
+const DECISIONS = {
+  pending:  { label: "판정 대기", desc: "" },
+  approved: { label: "승인", desc: "이대로 배포 가능" },
+  approved_with_risk: { label: "조건부 승인", desc: "남은 항목 담당·기한 기재 후 배포" },
+  rejected: { label: "반려", desc: "실패 항목 수정 후 재실행" }
+};
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const $ = id => document.getElementById(id);
+const now = () => { const d = new Date(), p = n => String(n).padStart(2, "0"); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; };
+
+/* ── 검토 상태 (메모리) ── */
+const review = { cases: {}, decision: "pending", by: "", note: "" };
+let dirty = false, savedAt = null, versions = [], db = null, booted = false;
+const DRAFT_KEY = `qa-draft:${REPORT.id}`;
+
+/* ── 렌더 ── */
+function render() {
+  const n = { pass: 0, fail: 0, blocked: 0, na: REPORT.unverified.length };
+  ALL.forEach(c => n[c.status]++);
+  const total = ALL.length + n.na;
+  document.title = `${REPORT.title} QA 리포트`;
+  $("runhead").innerHTML = `<span>${esc(REPORT.product)} · ${esc(REPORT.title)} QA</span><span>${esc(REPORT.id)} · ${esc(REPORT.target.commit)} · ${esc(REPORT.run.at)}</span>`;
+  $("head").innerHTML = `
+    <div>
+      <p class="kicker">${esc(REPORT.product)} · ${esc(REPORT.kind)} · ${esc(REPORT.id)}</p>
+      <h1>${esc(REPORT.title)} QA 리포트</h1>
+      <p class="sub">${esc(REPORT.target.pr)} · ${esc(REPORT.run.mode)} · 케이스 <b>${ALL.length}</b> · 통과 <b>${n.pass}</b> · 실패 <b>${n.fail}</b> · 막힘 <b>${n.blocked}</b> · 미검증 <b>${n.na}</b></p>
+    </div>
+    <div class="stamp" id="stamp" data-d="pending"><small>DECISION</small>판정 대기</div>`;
+  $("meta").innerHTML = [
+    ["대상", `${esc(REPORT.target.pr)} · <span class="mono">${esc(REPORT.target.branch)}</span>`],
+    ["커밋", `<span class="mono">${esc(REPORT.target.commit)}</span>`],
+    ["실행", `${esc(REPORT.run.at)} · ${esc(REPORT.run.by)}`],
+    ["환경", esc(REPORT.run.env)], ["모드", esc(REPORT.run.mode)], ["계정", esc(REPORT.run.account)]
+  ].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
+
+  $("bar").innerHTML = ["pass", "fail", "blocked", "na"].filter(k => n[k]).map(k => `<span class="${STATUS[k].fill}" style="flex:${n[k]}"></span>`).join("");
+  $("legend").innerHTML = ["pass", "fail", "blocked", "na"].map(k => `<div class="${n[k] ? "" : "z"}"><i class="${STATUS[k].fill}"></i>${STATUS[k].glyph} ${STATUS[k].label}<b>${n[k]}</b></div>`).join("")
+    + `<div class="all">전체 ${total} (케이스 ${ALL.length} + 미검증 ${n.na})</div>`;
+  $("scope").innerHTML = `<h3>검증 범위</h3><ul>${REPORT.covers.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+    <h3>범위 밖 (별도 확인)</h3><ul>${REPORT.notCovers.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
+
+  const attn = [
+    ...ALL.filter(c => c.status === "fail").map(c => ({ g: "✕", id: c.no, t: c.title, why: c.actual, how: c.issue || "이슈 등록 필요" })),
+    ...ALL.filter(c => c.status === "blocked").map(c => ({ g: "◐", id: c.no, t: c.title, why: c.actual, how: "스테이징 수동 확인" })),
+    ...REPORT.unverified.map(u => ({ g: "○", id: u.id, t: u.title, why: u.why, how: u.how }))
+  ];
+  $("attn").innerHTML = attn.map(a => `<div class="row"><span class="g">${a.g}</span><span class="id">${esc(a.id)}</span>
+    <div><div class="t">${esc(a.t)}</div><div class="why">${esc(a.why)}</div><div class="how">조치: ${esc(a.how)}</div></div></div>`).join("");
+
+  $("cases").innerHTML = REPORT.features.map(f => `<div class="feature">
+    <h3>${esc(f.name)} <span class="cnt">${f.cases.length}건 · 통과 ${f.cases.filter(c => c.status === "pass").length}</span></h3>
+    ${f.note ? `<p class="fnote">${esc(f.note)}</p>` : ""}${f.cases.map(caseHTML).join("")}</div>`).join("");
+
+  const autoOK = [n.fail === 0, ALL.filter(c => c.status === "blocked").every(c => c.actual)];
+  $("crit").innerHTML = REPORT.criteria.map((c, i) => `<li><span class="box ${c.auto && autoOK[i] ? "on" : ""}" data-crit="${i}"></span>
+    <span>${esc(c.text)} <span class="auto">${c.auto ? `· 자동: ${autoOK[i] ? "충족" : "미충족"}` : "· 저장 시 자동 판정"}</span></span></li>`).join("");
+  $("dec").innerHTML = Object.entries(DECISIONS).filter(([k]) => k !== "pending").map(([k, v]) =>
+    `<label><input type="radio" name="decision" id="dec-${k}" value="${k}"><span><b>${esc(v.label)}</b><span>${esc(v.desc)}</span></span></label>`).join("");
+  $("appx").innerHTML = Object.entries(REPORT.appendix).map(([k, v]) => `<dt>${esc(k)}</dt><dd><code>${esc(v)}</code></dd>`).join("");
+  $("note-box").textContent = REPORT.note || ""; $("note-box").hidden = !REPORT.note;
+  $("foot").innerHTML = `<span>${esc(REPORT.id)}</span><span>● 통과 ✕ 실패 ◐ 막힘 ○ 미검증 · 검토 □ 승인 □ 수정</span>`;
+
+  document.querySelectorAll('input[name="decision"]').forEach(el => el.addEventListener("change", e => { review.decision = e.target.value; touch(); }));
+  document.querySelectorAll(".rv input[type=radio]").forEach(el => el.addEventListener("change", e => {
+    const id = e.target.dataset.case; review.cases[id] = { ...(review.cases[id] || {}), verdict: e.target.value }; touch();
+  }));
+  document.querySelectorAll(".rv .memo").forEach(el => el.addEventListener("input", debounce(e => {
+    const id = e.target.dataset.case; review.cases[id] = { ...(review.cases[id] || {}), memo: e.target.value }; touch();
+  }, 400)));
+  $("by").addEventListener("input", debounce(e => { review.by = e.target.value; touch(); }, 400));
+  $("note").addEventListener("input", debounce(e => { review.note = e.target.value; touch(); }, 400));
+}
+
+function caseHTML(c) {
+  const s = STATUS[c.status] || STATUS.na;
+  const portrait = c.evidence && c.evidence.orientation === "portrait";
+  const ev = c.evidence
+    ? `<img src="${c.evidence.src}" alt="${esc(c.evidence.alt || c.title)}" loading="lazy"><div class="cap"><span>${esc(c.evidence.alt || "")}</span><span>캡처 ${esc(c.no)}</span></div>`
+    : `<div class="none">캡처 없음 · 미실행</div>`;
+  return `<div class="case ${portrait ? "portrait" : ""}" data-s="${esc(c.status)}" data-id="${esc(c.id)}">
+    <div class="top"><span class="g">${s.glyph}</span><span class="no">${esc(c.no)}</span><span class="title">${esc(c.title)}</span><span class="st">${s.label}</span></div>
+    <dl class="gwt">
+      <dt>사전조건</dt><dd>${esc(c.pre)}</dd>
+      <dt>절차</dt><dd>${c.steps.length > 1 ? `<ol>${c.steps.map(w => `<li>${esc(w)}</li>`).join("")}</ol>` : esc(c.steps[0] || "")}</dd>
+      <dt>기대결과</dt><dd class="expect">${esc(c.expect)}</dd>
+      <dt>결과</dt><dd class="actual"><span class="${c.status === "pass" ? "ok" : "ng"}">${esc(c.actual)}</span>${c.issue ? ` · ${esc(c.issue)}` : ""}</dd>
+      ${c.checks?.length ? `<dt>참고</dt><dd>${c.checks.map(esc).join(" · ")}</dd>` : ""}
+    </dl>
+    <div class="ev">${ev}</div>
+    <div class="rv">
+      <div class="opts">
+        <label><input type="radio" name="v-${esc(c.id)}" id="ok-${esc(c.id)}" value="approve" data-case="${esc(c.id)}"> 승인</label>
+        <label><input type="radio" name="v-${esc(c.id)}" id="fix-${esc(c.id)}" value="fix" data-case="${esc(c.id)}"> 수정 필요</label>
+      </div>
+      <input class="memo" id="memo-${esc(c.id)}" data-case="${esc(c.id)}" type="text" placeholder="메모" aria-label="${esc(c.no)} 메모">
+    </div></div>`;
+}
+
+/* ── 상태 → 화면 반영 ── */
+function applyReview() {
+  ALL.forEach(c => {
+    const r = review.cases[c.id] || {};
+    const el = document.querySelector(`.case[data-id="${CSS.escape(c.id)}"]`);
+    el.dataset.v = r.verdict || "";
+    if (r.verdict) $(`${r.verdict === "fix" ? "fix" : "ok"}-${c.id}`).checked = true;
+    $(`memo-${c.id}`).value = r.memo || "";
+  });
+  const d = DECISIONS[review.decision] || DECISIONS.pending;
+  $("stamp").dataset.d = review.decision; $("stamp").innerHTML = `<small>DECISION</small>${esc(d.label)}`;
+  const dr = document.querySelector(`input[name="decision"][value="${review.decision}"]`); if (dr) dr.checked = true;
+  $("by").value = review.by; $("note").value = review.note;
+  const done = ALL.filter(c => review.cases[c.id]?.verdict).length;
+  $("prog").textContent = `검토 ${done}/${ALL.length}`;
+  document.querySelector('[data-crit="3"]').classList.toggle("on", done === ALL.length);
+  $("yaml").textContent = toYAML(buildSubmission());
+  $("dot").classList.toggle("dirty", dirty);
+  $("status").textContent = (dirty ? "저장 안 된 변경 있음" : savedAt ? `v${versions.length} 저장됨 · ${savedAt}` : "저장된 검토 없음") + (booted && !db ? " · 로컬 모드(저장 = YAML 복사)" : "");
+  $("btn-save").disabled = !dirty && !!savedAt;
+  $("hist").innerHTML = versions.length ? `<h4>저장 이력</h4><ol>${versions.map(v =>
+    `<li><span class="mono">v${v.seq} ${esc(v.at)}</span> · ${esc(DECISIONS[v.decision]?.label || v.decision)} · 수정 ${v.fixCount} · 미판정 ${v.pending.length}${v.by ? ` · ${esc(v.by)}` : ""}</li>`).join("")}</ol>` : "";
+}
+
+/* ── 제출물: 예외만 담는다 ── */
+function buildSubmission() {
+  const cases = {};
+  ALL.forEach(c => { const r = review.cases[c.id]; if (r?.verdict === "fix" || (r?.memo && r.memo.trim())) cases[c.id] = { no: c.no, verdict: r.verdict || "none", memo: (r.memo || "").trim() }; });
+  const pending = ALL.filter(c => !review.cases[c.id]?.verdict).map(c => c.id);
+  return { report: REPORT.id, commit: REPORT.target.commit, seq: versions.length + 1, at: now(), by: review.by.trim(), decision: review.decision,
+    fixCount: Object.values(cases).filter(x => x.verdict === "fix").length, cases, pending, note: review.note.trim() };
+}
+function toYAML(s) {
+  const q = v => /^[\w가-힣 .\-·:#()→]*$/.test(v) && !/^\d/.test(v) && v !== "" ? v : JSON.stringify(v);
+  const L = [`report: ${s.report}`, `commit: ${s.commit}`, `seq: ${s.seq}`, `at: "${s.at}"`, `by: ${q(s.by)}`, `decision: ${s.decision}`];
+  const ids = Object.keys(s.cases);
+  L.push(ids.length ? "cases:" : "cases: {}");
+  ids.forEach(id => { const c = s.cases[id]; L.push(`  ${id}:`, `    no: "${c.no}"`, `    verdict: ${c.verdict}`); if (c.memo) L.push(`    memo: ${q(c.memo)}`); });
+  L.push(s.pending.length ? `pending: [${s.pending.join(", ")}]` : "pending: []");
+  L.push(`note: ${q(s.note)}`);
+  return L.join("\n") + "\n";
+}
+
+/* ── 초안: 클릭마다 조용히 ── */
+function touch() { dirty = true; applyReview(); saveDraft(); }
+const saveDraft = debounce(async () => {
+  const body = { ...review, updatedAt: now() };
+  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(body)); } catch {}
+  if (db) { try { await db.doc(`reviews/${REPORT.id}`).set(body); } catch {} }
+}, 600);
+async function loadDraft() {
+  let d = null;
+  if (db) { try { const s = await db.doc(`reviews/${REPORT.id}`).get(); if (s.exists) d = s.data(); } catch {} }
+  if (!d) { try { d = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null"); } catch {} }
+  if (d) { review.cases = d.cases || {}; review.decision = d.decision || "pending"; review.by = d.by || ""; review.note = d.note || ""; }
+  if (db) { try {
+    const q = await db.collection(`reviews/${REPORT.id}/submissions`).orderBy("seq", "asc").limit(50).get();
+    versions = q.docs.map(x => x.data()); if (versions.length) savedAt = versions[versions.length - 1].at;
+  } catch {} }
+  applyReview();
+}
+
+/* ── 제출: 버튼을 눌렀을 때만 ── */
+async function submit() {
+  const s = buildSubmission();
+  if (s.decision === "pending" && !confirm("최종 판정(승인/조건부/반려)을 고르지 않았습니다. 그대로 저장할까요?")) return;
+  if (s.pending.length && !confirm(`${s.pending.length}건이 미판정입니다. pending으로 표시하고 저장할까요?`)) return;
+  const yaml = toYAML(s);
+  if (db) {
+    try { await db.collection(`reviews/${REPORT.id}/submissions`).doc(String(s.seq).padStart(3, "0")).set({ ...s, yaml }); }
+    catch (e) { toast("서버 저장 실패. YAML을 복사해 전달하세요"); await copyYAML(yaml); return; }
+  } else { await copyYAML(yaml); }
+  versions.push(s); savedAt = s.at; dirty = false; $("at").value = s.at; applyReview();
+  toast(db ? `v${s.seq} 저장됨 · 이제 LLM이 읽을 수 있습니다` : `v${s.seq} YAML 복사됨 · 채팅에 붙여 넣으세요`);
+}
+async function copyYAML(y) { y = y || toYAML(buildSubmission()); try { await navigator.clipboard.writeText(y); toast("review.yaml 복사됨"); } catch { $("yamlbox").open = true; toast("복사 실패 · 아래 미리보기에서 직접 복사"); } }
+function toast(t) { const el = document.createElement("div"); el.className = "toast"; el.textContent = t; document.body.appendChild(el); setTimeout(() => el.remove(), 2600); }
+function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
+
+/* ── 부팅 ── */
+render(); applyReview();
+$("btn-save").addEventListener("click", submit);
+$("btn-copy").addEventListener("click", () => copyYAML());
+$("btn-print").addEventListener("click", () => window.print());
+window.addEventListener("beforeunload", e => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
+(async () => {
+  try { db = window.claude?.use ? await window.claude.use("db") : null; } catch { db = null; }
+  booted = true;
+  await loadDraft();
+})();
+</script>

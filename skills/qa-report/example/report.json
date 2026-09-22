@@ -1,0 +1,136 @@
+{
+  "id": "QA-MOBILE-2026-09-16-01",
+  "title": "알림함 목록",
+  "product": "샘플 앱 모바일",
+  "kind": "기능 QA · 화면 플로우",
+  "target": {
+    "pr": "#140",
+    "branch": "feat/mobile-inbox",
+    "commit": "abc1234"
+  },
+  "run": {
+    "at": "2026-09-16 14:10",
+    "by": "자동 캡처 (시뮬레이터)",
+    "env": "iPhone 16 Pro 시뮬레이터 · iOS 18",
+    "mode": "목업 모드 · 실서버 호출 없음",
+    "account": "목 계정"
+  },
+  "covers": [
+    "알림함 탭 진입 → 목록 · 빈 상태 화면 전이",
+    "읽음 · 읽지 않음 구분 표시",
+    "네트워크 끊김 시 안내"
+  ],
+  "notCovers": [
+    "푸시 알림 수신 (실기기)",
+    "알림 100건 이상 스크롤 성능",
+    "알림 삭제의 실제 서버 반영"
+  ],
+  "features": [
+    {
+      "name": "알림함 목록",
+      "note": "알림함 탭 진입. 알림 유무에 따라 목록 · 빈 상태 분기.",
+      "cases": [
+        {
+          "id": "inbox.list",
+          "no": "01",
+          "title": "알림 3건 · 목록 노출",
+          "status": "pass",
+          "pre": "알림 3건 시나리오",
+          "steps": [
+            "알림함 탭 진입"
+          ],
+          "expect": "알림 3행 노출 · 최신 순 정렬 · 각 행에 제목 · 시각 표시",
+          "actual": "기대와 동일",
+          "evidence": {
+            "src": "captures/01-inbox-list.png",
+            "alt": "알림 3건 목록",
+            "orientation": "portrait"
+          }
+        },
+        {
+          "id": "inbox.empty",
+          "no": "02",
+          "title": "빈 상태 · 안내 문구 노출",
+          "status": "pass",
+          "pre": "알림 0건 시나리오",
+          "steps": [
+            "알림함 탭 진입"
+          ],
+          "expect": "'알림이 없어요' 문구 + 일러스트 노출 · 목록 미노출",
+          "actual": "기대와 동일",
+          "evidence": {
+            "src": "captures/02-inbox-empty.png",
+            "alt": "빈 상태 화면",
+            "orientation": "portrait"
+          }
+        },
+        {
+          "id": "inbox.unread",
+          "no": "03",
+          "title": "읽지 않은 알림 · 행 배경 강조",
+          "status": "fail",
+          "pre": "읽지 않은 알림 1건 포함 시나리오",
+          "steps": [
+            "알림함 탭 진입"
+          ],
+          "expect": "읽지 않은 알림 행 배경 강조 · 읽은 행은 기본 배경",
+          "actual": "모든 행 기본 배경 · 읽지 않음 구분 안 됨 (시안용 가상 결과)",
+          "issue": "이슈 미등록",
+          "checks": [
+            "색 구분은 인쇄물에서 확인 불가 → 화면 확인"
+          ],
+          "evidence": {
+            "src": "captures/03-inbox-unread.png",
+            "alt": "읽지 않은 알림 행",
+            "orientation": "portrait"
+          }
+        },
+        {
+          "id": "inbox.offline",
+          "no": "04",
+          "title": "네트워크 끊김 · 안내 + 다시 시도",
+          "status": "blocked",
+          "pre": "기기 네트워크 차단 상태",
+          "steps": [
+            "알림함 탭 진입"
+          ],
+          "expect": "'연결을 확인해 주세요' 안내 + '다시 시도' 버튼 노출",
+          "actual": "시뮬레이터에서 네트워크 차단 재현 불가 → 미실행",
+          "evidence": null
+        }
+      ]
+    }
+  ],
+  "unverified": [
+    {
+      "id": "U1",
+      "title": "푸시 알림 수신",
+      "why": "실기기 필요",
+      "how": "테스트 기기 1대에 푸시 1건 발송 후 알림함 반영 확인"
+    }
+  ],
+  "criteria": [
+    {
+      "text": "실패 0건",
+      "auto": true
+    },
+    {
+      "text": "막힘 항목 사유 · 대체 확인 방법 기재",
+      "auto": true
+    },
+    {
+      "text": "미검증 항목 실기기 확인 담당 지정",
+      "auto": false
+    },
+    {
+      "text": "전 케이스 검토 표시 완료",
+      "auto": false
+    }
+  ],
+  "appendix": {
+    "재실행": "캡처 도구로 알림함 시나리오 3종 재생성 (목업 모드)",
+    "원본 데이터": "report.json (이 페이지는 그 파일로 그린 결과물)",
+    "검토 결과": "review.yaml (저장 버튼이 만든다 · LLM은 이 파일만 읽는다)"
+  },
+  "note": "시안 안내 — 캡처는 형식을 보여 주기 위한 자리표시 이미지. 03 결과 · 04 케이스는 실패·막힘 표시 확인용 가상 데이터."
+}
