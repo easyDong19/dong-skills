@@ -27,7 +27,6 @@
   code, .mono { font-family: var(--mono); font-size: .92em; }
   a { color: inherit; }
   button { font: inherit; }
-  .runhead { display: none; }
 
   /* ── 검토 상태 바 (화면 전용) ── */
   .bar-top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--paper); border-bottom: 1px solid var(--rule); }
@@ -205,7 +204,6 @@
     body { background: #fff; font-size: 10.5pt; }
     .sheet { max-width: none; margin: 0; padding: 0; box-shadow: none; }
     .bar-top, .screen-only, .toast, .lb { display: none !important; }
-    .runhead { display: flex; position: fixed; top: auto; bottom: -13mm; left: 0; right: 0; justify-content: space-between; font-family: var(--mono); font-size: 8pt; color: #555; }
     h1 { font-size: 20pt; }
     h2 { font-size: 12.5pt; break-after: avoid; margin-top: 16pt; }
     .feature h3 { break-after: avoid; }
@@ -229,7 +227,6 @@
 </div>
 
 <article class="sheet">
-  <div class="runhead" id="runhead"></div>
   <header class="head" id="head"></header>
   <dl class="meta" id="meta"></dl>
 
@@ -326,7 +323,14 @@ function render() {
   ALL.forEach(c => n[c.status]++);
   const total = ALL.length + n.na;
   document.title = `${REPORT.title} QA 리포트`;
-  $("runhead").innerHTML = `<span>${esc(REPORT.product)} · ${esc(REPORT.title)} QA</span><span>${esc(REPORT.id)} · ${esc(REPORT.target.commit)} · ${esc(REPORT.run.at)}</span>`;
+  // 인쇄 바닥글은 @page 여백 상자로 그린다 (position: fixed 는 헤드리스 PDF에서 본문과 겹친다)
+  const cssStr = v => '"' + String(v).replace(/[\\"]/g, "\\$&").replace(/\n/g, " ") + '"';
+  const foot = document.createElement("style");
+  foot.textContent = `@page {
+    @bottom-left { content: ${cssStr(`${REPORT.product} · ${REPORT.title} QA`)}; font: 8pt ui-monospace, monospace; color: #555; }
+    @bottom-right { content: ${cssStr(`${REPORT.id} · ${REPORT.target.commit} · ${REPORT.run.at}`)} "  ·  " counter(page) " / " counter(pages); font: 8pt ui-monospace, monospace; color: #555; }
+  }`;
+  document.head.appendChild(foot);
   $("head").innerHTML = `
     <div>
       <p class="kicker">${esc(REPORT.product)} · ${esc(REPORT.kind)} · ${esc(REPORT.id)}</p>

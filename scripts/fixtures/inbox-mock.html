@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>습관 기록 · 알림함 (가상 화면)</title>
+<!--
+  qa-report 예시 캡처용 가상 화면. 실제 앱이 아니다.
+  ?state=list | empty | unread | swipe  로 장면을 고른다.
+  swipe 장면은 window.playSwipe() 를 부르면 첫 행을 왼쪽으로 민다 (GIF 녹화용).
+-->
+<style>
+  :root {
+    --bg: #f4f4f1; --card: #ffffff; --ink: #1d1d1b; --sub: #77756f; --rule: #e4e2dc;
+    --accent: #2f6f4e; --accent-soft: #e6f0ea; --danger: #c8402f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 390px; height: 844px; overflow: hidden; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, "Apple SD Gothic Neo", "Pretendard", system-ui, sans-serif; }
+  .status { height: 54px; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 28px 8px; font-size: 15px; font-weight: 600; }
+  .status .icons { display: flex; gap: 6px; align-items: center; }
+  .status .bat { width: 25px; height: 12px; border: 1.5px solid var(--ink); border-radius: 3px; position: relative; }
+  .status .bat::after { content: ""; position: absolute; inset: 1.5px; width: 70%; background: var(--ink); border-radius: 1px; }
+  header { padding: 10px 20px 14px; display: flex; align-items: baseline; justify-content: space-between; }
+  header h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; }
+  header button { border: 0; background: none; color: var(--accent); font-size: 15px; font-weight: 600; }
+  .seg { margin: 0 20px 14px; display: flex; background: #e8e7e2; border-radius: 9px; padding: 2px; }
+  .seg span { flex: 1; text-align: center; font-size: 13px; padding: 6px 0; border-radius: 7px; color: var(--sub); }
+  .seg span.on { background: var(--card); color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+  .day { padding: 8px 20px 6px; font-size: 13px; color: var(--sub); font-weight: 600; }
+  ul { list-style: none; margin: 0 16px; background: var(--card); border-radius: 14px; overflow: hidden; }
+  li { position: relative; border-bottom: 1px solid var(--rule); overflow: hidden; }
+  li:last-child { border-bottom: 0; }
+  .row { position: relative; z-index: 1; display: flex; gap: 12px; padding: 14px 16px; background: var(--card); transition: transform .45s cubic-bezier(.2,.8,.2,1); }
+  li.unread .row { background: var(--accent-soft); }
+  .ic { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-size: 19px; background: #efeee9; flex: none; }
+  .body { flex: 1; min-width: 0; }
+  .t { display: flex; justify-content: space-between; gap: 8px; font-size: 15px; font-weight: 600; }
+  .t time { font-size: 12.5px; color: var(--sub); font-weight: 400; flex: none; }
+  .d { margin-top: 3px; font-size: 13.5px; color: var(--sub); line-height: 1.4; }
+  .dot { position: absolute; left: 6px; top: 50%; width: 6px; height: 6px; margin-top: -3px; border-radius: 50%; background: var(--accent); z-index: 2; }
+  .del { position: absolute; right: 0; top: 0; bottom: 0; width: 88px; background: var(--danger); color: #fff; display: grid; place-items: center; font-size: 15px; font-weight: 600; }
+  .del { visibility: hidden; }
+  li.swiped .del { visibility: visible; }
+  li.swiped .row { transform: translateX(-88px); }
+  .empty { margin-top: 120px; text-align: center; color: var(--sub); }
+  .empty .ill { width: 112px; height: 112px; margin: 0 auto 22px; border-radius: 50%; background: #e8e7e2; display: grid; place-items: center; font-size: 48px; }
+  .empty b { display: block; color: var(--ink); font-size: 18px; margin-bottom: 8px; }
+  .empty p { font-size: 14px; line-height: 1.5; }
+  nav { position: absolute; left: 0; right: 0; bottom: 0; height: 84px; background: rgba(255,255,255,.94); border-top: 1px solid var(--rule); display: flex; padding-top: 8px; }
+  nav a { flex: 1; text-align: center; font-size: 10.5px; color: #a3a19a; text-decoration: none; }
+  nav a i { display: block; font-style: normal; font-size: 22px; margin-bottom: 2px; filter: grayscale(1); opacity: .55; }
+  nav a.on { color: var(--accent); font-weight: 600; }
+  nav a.on i { filter: none; opacity: 1; }
+  nav .badge { display: inline-block; min-width: 16px; padding: 0 4px; margin-left: 2px; border-radius: 8px; background: var(--danger); color: #fff; font-size: 10px; line-height: 16px; }
+  .finger { position: absolute; width: 44px; height: 44px; border-radius: 50%; background: rgba(29,29,27,.22); border: 2px solid rgba(255,255,255,.9); z-index: 5; pointer-events: none; opacity: 0;
+    transition: left .45s cubic-bezier(.2,.8,.2,1), opacity .2s; }
+</style>
+</head>
+<body>
+<div class="status"><span>9:41</span><span class="icons"><span>••••</span><span class="bat"></span></span></div>
+<header><h1>알림</h1><button id="readall">모두 읽음</button></header>
+<div class="seg"><span class="on">전체</span><span>습관</span><span>친구</span></div>
+<main id="main"></main>
+<nav>
+  <a href="#"><i>🏠</i>오늘</a>
+  <a href="#"><i>📈</i>기록</a>
+  <a href="#" class="on"><i>🔔</i>알림<span class="badge" id="badge" hidden></span></a>
+  <a href="#"><i>👤</i>내 정보</a>
+</nav>
+<div class="finger" id="finger"></div>
+<script>
+  const ITEMS = [
+    { ic: "🔥", t: "7일 연속 달성!", d: "‘아침 물 한 잔’ 습관을 일주일째 지키고 있어요.", time: "방금" },
+    { ic: "⏰", t: "저녁 스트레칭 시간이에요", d: "오늘 목표까지 1회 남았어요.", time: "오후 8:00" },
+    { ic: "👋", t: "민지 님이 응원을 보냈어요", d: "“같이 끝까지 가봐요!”", time: "오후 2:14" },
+  ];
+  const state = new URLSearchParams(location.search).get("state") || "list";
+  const main = document.getElementById("main");
+
+  if (state === "empty") {
+    document.getElementById("readall").hidden = true;
+    main.innerHTML = `<div class="empty"><div class="ill">🌱</div><b>알림이 없어요</b><p>습관을 기록하면<br>응원과 리마인더가 여기에 쌓여요.</p></div>`;
+  } else {
+    // unread 장면: 첫 행이 읽지 않은 알림이지만 배경 강조가 빠진 '실패' 상태를 재현한다
+    const unreadIdx = state === "unread" ? 0 : -1;
+    main.innerHTML = `<div class="day">오늘</div><ul>` + ITEMS.map((it, i) => `
+      <li data-i="${i}">
+        <div class="del">삭제</div>
+        ${i === unreadIdx ? '<span class="dot"></span>' : ""}
+        <div class="row"><div class="ic">${it.ic}</div>
+          <div class="body"><div class="t"><span>${it.t}</span><time>${it.time}</time></div><div class="d">${it.d}</div></div>
+        </div>
+      </li>`).join("") + `</ul>`;
+    if (unreadIdx >= 0) { const b = document.getElementById("badge"); b.hidden = false; b.textContent = "1"; }
+  }
+
+  // GIF 녹화용: 손가락 표시가 첫 행을 왼쪽으로 밀고, 삭제 버튼이 드러난다
+  window.playSwipe = async () => {
+    const li = document.querySelector("li"); const f = document.getElementById("finger");
+    const r = li.getBoundingClientRect();
+    f.style.top = (r.top + r.height / 2 - 22) + "px"; f.style.left = (r.right - 80) + "px";
+    await new Promise(s => setTimeout(s, 50)); f.style.opacity = 1;
+    await new Promise(s => setTimeout(s, 350));
+    f.style.left = (r.right - 190) + "px"; li.classList.add("swiped");
+    await new Promise(s => setTimeout(s, 500)); f.style.opacity = 0;
+  };
+</script>
+</body>
+</html>

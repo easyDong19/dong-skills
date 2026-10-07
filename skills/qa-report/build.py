@@ -114,6 +114,9 @@ def lint(rep, base):
     return errors, warns
 
 
+MIME = {".png": "image/png", ".gif": "image/gif", ".webp": "image/webp", ".jpg": "image/jpeg", ".jpeg": "image/jpeg"}
+
+
 def build(rep, base, out, pdf):
     tpl = TEMPLATE.read_text(encoding="utf-8")
     rep = json.loads(json.dumps(rep))  # copy
@@ -122,7 +125,7 @@ def build(rep, base, out, pdf):
             ev = c.get("evidence")
             if ev:
                 p = base / ev["src"]
-                mime = "image/png" if p.suffix.lower() == ".png" else "image/jpeg"
+                mime = MIME.get(p.suffix.lower(), "image/jpeg")
                 ev["src"] = f"data:{mime};base64," + base64.b64encode(p.read_bytes()).decode()
     js = json.dumps(rep, ensure_ascii=False).replace("</", "<\\/")
     html = tpl.replace("<!--TITLE-->", f"{rep['title']} QA 리포트").replace("<!--REPORT_JSON-->", js)
