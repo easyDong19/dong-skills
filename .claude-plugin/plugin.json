@@ -1,6 +1,6 @@
 {
   "name": "dong-skills",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "유동연의 Claude Code 스킬 모음 — 기술 문서 작성·리뷰, 데일리 스크럼, QA 리포트, 학습 자료 생성.",
   "author": {
     "name": "Dongyeon Yu",

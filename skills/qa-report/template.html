@@ -40,6 +40,9 @@
   .btn { padding: 6px 12px; border: 1px solid var(--ink); background: var(--paper); color: var(--ink); cursor: pointer; font-size: 12.5px; }
   .btn.primary { background: var(--ink); color: var(--paper); }
   .btn:disabled { opacity: .45; cursor: default; }
+  .all-ok { display: inline-flex; gap: 6px; align-items: center; white-space: nowrap; }
+  .all-ok .box { font-size: 14px; line-height: 1; width: 1em; text-align: center; }
+  .all-ok[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
   .btn:focus-visible, input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
   /* ── 머리말 ── */
@@ -121,6 +124,8 @@
   .gwt ol { margin: 0; padding-left: 1.2em; }
   .ev { align-self: start; }
   .ev img { display: block; width: 100%; height: auto; border: 1px solid var(--rule); background: var(--tint); }
+  .ev .zoom { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }
+  .ev .zoom:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
   .ev .cap { font-size: 11px; color: var(--ink-3); margin-top: 3px; display: flex; justify-content: space-between; gap: 8px; }
   .ev .none { border: 1px dashed var(--rule); aspect-ratio: 16 / 10; display: grid; place-items: center; text-align: center; color: var(--ink-3); font-size: 12px; padding: 12px; }
   .rv { grid-column: 1 / -1; display: grid; grid-template-columns: auto 1fr; gap: 10px 16px; align-items: center; border-top: 1px dotted var(--rule); padding-top: 8px; font-size: 12.5px; }
@@ -171,12 +176,35 @@
   .foot { margin-top: 28px; padding-top: 8px; border-top: 1px solid var(--rule); font-size: 11px; color: var(--ink-3); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: var(--mono); }
   .toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 8px 14px; font-size: 12.5px; z-index: 9; }
 
+  /* ── 캡처 확대 보기 (화면 전용) ── */
+  .lb { position: fixed; inset: 0; width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: #111110; color: #f4f4f2; overflow: hidden; }
+  .lb::backdrop { background: transparent; }
+  .lb-bar { position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center; gap: 12px; padding: calc(10px + env(safe-area-inset-top, 0px)) 16px 10px; font-size: 13px; }
+  .lb-cap { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lb-cap .no { font-family: var(--mono); color: #b5b5b1; margin-right: 8px; }
+  .lb-count { font-family: var(--mono); color: #b5b5b1; font-size: 12px; }
+  .lb-btn { padding: 6px 12px; border: 1px solid #6a6a66; background: transparent; color: inherit; cursor: pointer; font-size: 12.5px; }
+  .lb-btn:hover { border-color: #f4f4f2; }
+  .lb-btn:focus-visible, .lb-nav:focus-visible { outline: 2px solid #f4f4f2; outline-offset: 2px; }
+  .lb-stage { position: absolute; top: 52px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); left: 56px; right: 56px; overflow: auto; display: flex; align-items: safe center; justify-content: safe center; }
+  .lb-stage img { display: block; flex: none; max-width: 100%; max-height: 100%; object-fit: contain; background: #fff; cursor: zoom-in; }
+  .lb.actual .lb-stage img { max-width: none; max-height: none; cursor: zoom-out; }
+  .lb-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 64px; border: 0; background: rgba(255, 255, 255, .08); color: inherit; font-size: 22px; cursor: pointer; }
+  .lb-nav:hover { background: rgba(255, 255, 255, .18); }
+  .lb-nav:disabled { opacity: .25; cursor: default; }
+  .lb-nav.prev { left: 8px; } .lb-nav.next { right: 8px; }
+  @media (max-width: 640px) {
+    .lb-stage { left: 8px; right: 8px; bottom: 72px; }
+    .lb-nav { top: auto; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); transform: none; height: 44px; width: 64px; }
+    .lb-count { display: none; }
+  }
+
   @page { size: A4; margin: 14mm 12mm 20mm; }
   @media print {
     :root { --paper: #fff; --ground: #fff; --ink: #000; --ink-2: #222; --ink-3: #555; --rule: #999; --rule-soft: #ccc; --tint: #f2f2f2; }
     body { background: #fff; font-size: 10.5pt; }
     .sheet { max-width: none; margin: 0; padding: 0; box-shadow: none; }
-    .bar-top, .screen-only, .toast { display: none !important; }
+    .bar-top, .screen-only, .toast, .lb { display: none !important; }
     .runhead { display: flex; position: fixed; top: auto; bottom: -13mm; left: 0; right: 0; justify-content: space-between; font-family: var(--mono); font-size: 8pt; color: #555; }
     h1 { font-size: 20pt; }
     h2 { font-size: 12.5pt; break-after: avoid; margin-top: 16pt; }
@@ -192,6 +220,7 @@
     <div class="st"><span class="dot" id="dot"></span><span id="status">불러오는 중</span></div>
     <span class="prog" id="prog"></span>
     <div class="acts">
+      <button type="button" class="btn all-ok" id="all-ok" aria-pressed="false" title="모든 케이스를 승인으로 두고 최종 판정도 승인으로 둔다"><span class="box" aria-hidden="true">☐</span>전체 승인</button>
       <button type="button" class="btn" id="btn-copy">YAML 복사</button>
       <button type="button" class="btn" id="btn-print">인쇄</button>
       <button type="button" class="btn primary" id="btn-save">검토 저장</button>
@@ -247,6 +276,18 @@
   </section>
   <div class="foot" id="foot"></div>
 </article>
+
+<dialog class="lb screen-only" id="lightbox" aria-labelledby="lb-cap">
+  <div class="lb-bar">
+    <div class="lb-cap" id="lb-cap"></div>
+    <span class="lb-count" id="lb-count"></span>
+    <button type="button" class="lb-btn" id="lb-actual" aria-pressed="false">원본 크기</button>
+    <button type="button" class="lb-btn" id="lb-close">닫기</button>
+  </div>
+  <div class="lb-stage" id="lb-stage"><img id="lb-img" alt=""></div>
+  <button type="button" class="lb-nav prev" id="lb-prev" aria-label="이전 캡처">&#8249;</button>
+  <button type="button" class="lb-nav next" id="lb-next" aria-label="다음 캡처">&#8250;</button>
+</dialog>
 
 <script type="application/json" id="report-data"><!--REPORT_JSON--></script>
 <script>
@@ -342,7 +383,7 @@ function caseHTML(c) {
   const s = STATUS[c.status] || STATUS.na;
   const portrait = c.evidence && c.evidence.orientation === "portrait";
   const ev = c.evidence
-    ? `<img src="${c.evidence.src}" alt="${esc(c.evidence.alt || c.title)}" loading="lazy"><div class="cap"><span>${esc(c.evidence.alt || "")}</span><span>캡처 ${esc(c.no)}</span></div>`
+    ? `<button type="button" class="zoom" data-zoom="${esc(c.id)}" aria-label="캡처 ${esc(c.no)} 확대"><img src="${c.evidence.src}" alt="${esc(c.evidence.alt || c.title)}" loading="lazy"></button><div class="cap"><span>${esc(c.evidence.alt || "")}</span><span>캡처 ${esc(c.no)}</span></div>`
     : `<div class="none">캡처 없음 · 미실행</div>`;
   return `<div class="case ${portrait ? "portrait" : ""}" data-s="${esc(c.status)}" data-id="${esc(c.id)}">
     <div class="top"><span class="g">${s.glyph}</span><span class="no">${esc(c.no)}</span><span class="title">${esc(c.title)}</span><span class="st">${s.label}</span></div>
@@ -369,7 +410,7 @@ function applyReview() {
     const r = review.cases[c.id] || {};
     const el = document.querySelector(`.case[data-id="${CSS.escape(c.id)}"]`);
     el.dataset.v = r.verdict || "";
-    if (r.verdict) $(`${r.verdict === "fix" ? "fix" : "ok"}-${c.id}`).checked = true;
+    $(`ok-${c.id}`).checked = r.verdict === "approve"; $(`fix-${c.id}`).checked = r.verdict === "fix";
     $(`memo-${c.id}`).value = r.memo || "";
   });
   const d = DECISIONS[review.decision] || DECISIONS.pending;
@@ -378,11 +419,22 @@ function applyReview() {
   $("by").value = review.by; $("note").value = review.note;
   const done = ALL.filter(c => review.cases[c.id]?.verdict).length;
   $("prog").textContent = `검토 ${done}/${ALL.length}`;
-  document.querySelector('[data-crit="3"]').classList.toggle("on", done === ALL.length);
+  // 전체 승인 체크는 저장된 상태가 아니라 케이스 판정에서 유도한다 — 하나라도 풀면 같이 풀린다.
+  const okCount = ALL.filter(c => review.cases[c.id]?.verdict === "approve").length;
+  // 네이티브 체크박스 대신 버튼 + 글리프로 그린다 — 표시가 브라우저 폼 상태 복원이 아니라 이 판정에서만 나온다.
+  const allOk = ALL.length > 0 && okCount === ALL.length;
+  $("all-ok").setAttribute("aria-pressed", String(allOk));
+  $("all-ok").querySelector(".box").textContent = allOk ? "☑" : okCount ? "▣" : "☐";
+  // '전 케이스 검토' 기준은 위치가 아니라 문구로 찾는다(기준 개수는 리포트마다 다르다).
+  const reviewCrit = REPORT.criteria.findIndex(c => !c.auto && /검토/.test(c.text));
+  document.querySelector(`[data-crit="${reviewCrit}"]`)?.classList.toggle("on", done === ALL.length);
   $("yaml").textContent = toYAML(buildSubmission());
   $("dot").classList.toggle("dirty", dirty);
-  $("status").textContent = (dirty ? "저장 안 된 변경 있음" : savedAt ? `v${versions.length} 저장됨 · ${savedAt}` : "저장된 검토 없음") + (booted && !db ? " · 로컬 모드(저장 = YAML 복사)" : "");
-  $("btn-save").disabled = !dirty && !!savedAt;
+  $("status").textContent = !booted ? "저장된 검토 불러오는 중…" : (dirty ? "저장 안 된 변경 있음" : savedAt ? `v${versions.length} 저장됨 · ${savedAt}` : "저장된 검토 없음") + (!db ? " · 로컬 모드(저장 = YAML 복사)" : "");
+  // 저장된 검토를 다 불러오기 전(db 연결은 몇 초 늦게 온다)에는 조작을 막는다 — 막지 않으면
+  // 그 사이 누른 판정을 뒤늦게 도착한 초안이 덮어써서 "승인이 안 눌리는" 것처럼 보인다.
+  document.querySelectorAll(".rv input, .dec input, #by, #note, #all-ok").forEach(el => { el.disabled = !booted; });
+  $("btn-save").disabled = !booted || (!dirty && !!savedAt);
   $("hist").innerHTML = versions.length ? `<h4>저장 이력</h4><ol>${versions.map(v =>
     `<li><span class="mono">v${v.seq} ${esc(v.at)}</span> · ${esc(DECISIONS[v.decision]?.label || v.decision)} · 수정 ${v.fixCount} · 미판정 ${v.pending.length}${v.by ? ` · ${esc(v.by)}` : ""}</li>`).join("")}</ol>` : "";
 }
@@ -408,16 +460,35 @@ function toYAML(s) {
 
 /* ── 초안: 클릭마다 조용히 ── */
 function touch() { dirty = true; applyReview(); saveDraft(); }
+// 전체 승인: 켜면 모든 케이스를 승인(수정 필요였던 것도)으로, 최종 판정을 승인으로 둔다.
+// 끄면 승인 판정만 비우고 최종 판정이 승인이었으면 대기로 되돌린다. 메모는 건드리지 않는다.
+function setAllApproved(on) {
+  const fixed = ALL.filter(c => review.cases[c.id]?.verdict === "fix").length;
+  ALL.forEach(c => {
+    const r = { ...(review.cases[c.id] || {}) };
+    if (on) r.verdict = "approve"; else if (r.verdict === "approve") delete r.verdict;
+    review.cases[c.id] = r;
+  });
+  if (on) review.decision = "approved"; else if (review.decision === "approved") review.decision = "pending";
+  touch();
+  toast(on ? `${ALL.length}건 전체 승인${fixed ? ` · 수정 필요 ${fixed}건도 승인으로 바뀜` : ""} · "검토 저장"을 눌러야 확정돼요` : "전체 승인을 풀었어요");
+}
 const saveDraft = debounce(async () => {
-  const body = { ...review, updatedAt: now() };
+  const body = { ...review, commit: REPORT.target.commit, updatedAt: now() };
   try { localStorage.setItem(DRAFT_KEY, JSON.stringify(body)); } catch {}
   if (db) { try { await db.doc(`reviews/${REPORT.id}`).set(body); } catch {} }
 }, 600);
 async function loadDraft() {
   let d = null;
-  if (db) { try { const s = await db.doc(`reviews/${REPORT.id}`).get(); if (s.exists) d = s.data(); } catch {} }
+  // 뷰어 db의 data()는 얼어 있다(깊게). 그대로 review에 붙이면 이후 판정 쓰기가 조용히 무시돼
+  // "승인/전체 승인이 안 눌리는" 것처럼 보이므로 반드시 복제해서 쓴다.
+  if (db) { try { const s = await db.doc(`reviews/${REPORT.id}`).get(); if (s.exists) d = structuredClone(s.data()); } catch {} }
   if (!d) { try { d = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null"); } catch {} }
-  if (d) { review.cases = d.cases || {}; review.decision = d.decision || "pending"; review.by = d.by || ""; review.note = d.note || ""; }
+  // 재캡처(커밋이 다른 리포트)면 이전 회차 판정은 새 캡처에 맞지 않으므로 비운다 — 이력(submissions)은 그대로 남는다.
+  const staleRound = !!d && d.commit !== REPORT.target.commit;
+  if (d && !staleRound) { review.cases = d.cases || {}; review.decision = d.decision || "pending"; }
+  if (d) { review.by = d.by || ""; review.note = staleRound ? "" : (d.note || ""); }
+  if (staleRound) setTimeout(() => toast("새 캡처라 이전 회차 판정을 비웠어요 · 저장 이력은 아래에 남아 있어요"), 0);
   if (db) { try {
     const q = await db.collection(`reviews/${REPORT.id}/submissions`).orderBy("seq", "asc").limit(50).get();
     versions = q.docs.map(x => x.data()); if (versions.length) savedAt = versions[versions.length - 1].at;
@@ -426,10 +497,20 @@ async function loadDraft() {
 }
 
 /* ── 제출: 버튼을 눌렀을 때만 ── */
+let armedWarning = null;
 async function submit() {
   const s = buildSubmission();
-  if (s.decision === "pending" && !confirm("최종 판정(승인/조건부/반려)을 고르지 않았습니다. 그대로 저장할까요?")) return;
-  if (s.pending.length && !confirm(`${s.pending.length}건이 미판정입니다. pending으로 표시하고 저장할까요?`)) return;
+  // confirm()은 아티팩트 뷰어에서 대화상자 없이 곧바로 false라 저장이 조용히 취소된다.
+  // 경고가 있으면 한 번 알리고, 같은 상태에서 한 번 더 누르면 그대로 저장한다.
+  const warning = s.decision === "pending" ? "최종 판정(승인/조건부/반려)을 고르지 않았어요"
+    : s.pending.length ? `${s.pending.length}건이 미판정이에요` : null;
+  const warnKey = warning && warning + s.pending.join();
+  if (warning && armedWarning !== warnKey) {
+    armedWarning = warnKey;
+    toast(`${warning} · 이대로 저장하려면 한 번 더 누르세요`);
+    return;
+  }
+  armedWarning = null;
   const yaml = toYAML(s);
   if (db) {
     try { await db.collection(`reviews/${REPORT.id}/submissions`).doc(String(s.seq).padStart(3, "0")).set({ ...s, yaml }); }
@@ -442,15 +523,64 @@ async function copyYAML(y) { y = y || toYAML(buildSubmission()); try { await nav
 function toast(t) { const el = document.createElement("div"); el.className = "toast"; el.textContent = t; document.body.appendChild(el); setTimeout(() => el.remove(), 2600); }
 function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
 
+/* ── 캡처 확대 보기 ──
+   캡처 클릭 → 모달. 화살표·버튼으로 이전/다음, 이미지 클릭·[원본 크기]로 맞춤 ↔ 원본 전환,
+   Esc·배경 클릭·[닫기]로 닫는다. 닫으면 연 캡처 버튼으로 포커스가 돌아간다. */
+const SHOTS = ALL.filter(c => c.evidence);
+let lbIndex = -1, lbOpener = null;
+function setActual(on) {
+  $("lightbox").classList.toggle("actual", on);
+  $("lb-actual").setAttribute("aria-pressed", String(on));
+  $("lb-actual").textContent = on ? "화면 맞춤" : "원본 크기";
+}
+function showShot(i) {
+  lbIndex = Math.max(0, Math.min(SHOTS.length - 1, i));
+  const c = SHOTS[lbIndex];
+  $("lb-img").src = c.evidence.src;
+  $("lb-img").alt = c.evidence.alt || c.title;
+  $("lb-cap").innerHTML = `<span class="no">${esc(c.no)}</span>${esc(c.title)}${c.evidence.alt ? ` · ${esc(c.evidence.alt)}` : ""}`;
+  $("lb-count").textContent = `${lbIndex + 1} / ${SHOTS.length}`;
+  $("lb-prev").disabled = lbIndex === 0;
+  $("lb-next").disabled = lbIndex === SHOTS.length - 1;
+  setActual(false);
+  $("lb-stage").scrollTo(0, 0);
+}
+function openLightbox(id, opener) {
+  const i = SHOTS.findIndex(c => c.id === id);
+  if (i < 0) return;
+  lbOpener = opener || null;
+  showShot(i);
+  if (!$("lightbox").open) $("lightbox").showModal();
+  $("lb-close").focus();
+}
+document.addEventListener("click", e => {
+  const btn = e.target.closest(".zoom[data-zoom]");
+  if (btn) openLightbox(btn.dataset.zoom, btn);
+});
+$("lb-img").addEventListener("click", () => setActual(!$("lightbox").classList.contains("actual")));
+$("lb-actual").addEventListener("click", () => setActual(!$("lightbox").classList.contains("actual")));
+$("lb-close").addEventListener("click", () => $("lightbox").close());
+$("lb-prev").addEventListener("click", () => showShot(lbIndex - 1));
+$("lb-next").addEventListener("click", () => showShot(lbIndex + 1));
+// 이미지 바깥(배경·빈 여백) 클릭은 닫기
+$("lightbox").addEventListener("click", e => { if (e.target === $("lightbox") || e.target === $("lb-stage")) $("lightbox").close(); });
+$("lightbox").addEventListener("keydown", e => {
+  if (e.key === "ArrowLeft") { e.preventDefault(); showShot(lbIndex - 1); }
+  if (e.key === "ArrowRight") { e.preventDefault(); showShot(lbIndex + 1); }
+});
+$("lightbox").addEventListener("close", () => { $("lb-img").removeAttribute("src"); lbOpener?.focus(); });
+
 /* ── 부팅 ── */
 render(); applyReview();
 $("btn-save").addEventListener("click", submit);
+$("all-ok").addEventListener("click", e => setAllApproved(e.currentTarget.getAttribute("aria-pressed") !== "true"));
 $("btn-copy").addEventListener("click", () => copyYAML());
 $("btn-print").addEventListener("click", () => window.print());
 window.addEventListener("beforeunload", e => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
 (async () => {
   try { db = window.claude?.use ? await window.claude.use("db") : null; } catch { db = null; }
-  booted = true;
   await loadDraft();
+  booted = true;
+  applyReview();
 })();
 </script>

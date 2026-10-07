@@ -25,7 +25,7 @@ claude plugin install dong-skills@dong-skills
 | --- | --- | --- |
 | `choosing-doc-type` | 문서를 쓰기 시작하기 전 | Diátaxis 4유형(학습·문제 해결·참조·설명) 중 하나를 2축 결정표로 정한다. 한 문서 = 한 유형 |
 | `doc-structure-review` | 초안·목차가 나온 뒤 | 5개 정보 구조 원칙으로 진단하고 통합 개선 목차 하나를 낸다 |
-| `doc-sentence-polish` | 문장을 다듬을 때 | 5개 원칙으로 문장 수준 피드백과 통합 수정안을 낸다. 의미는 바꾸지 않는다 |
+| `doc-sentence-polish` | 문장을 다듬을 때 | 6개 원칙으로 문장 수준 피드백과 통합 수정안을 낸다. 의미는 바꾸지 않는다 |
 | `explaining-with-domain-context` | 코드·플로우·결정을 설명할 때 | 문제와 도메인부터 시작해 인과 사슬로 서술한다. 인수인계·온보딩 문서에도 쓴다 |
 
 ### 작업 공유
@@ -33,7 +33,7 @@ claude plugin install dong-skills@dong-skills
 | 스킬 | 무엇을 |
 | --- | --- |
 | `daily-scrum` | 그날의 커밋·PR을 비개발자도 읽을 수 있는 기능 단위 스크럼 메모로 만든다. 스크럼 테이블 셀에 바로 붙일 평문 형식 |
-| `qa-report` | 화면 캡처와 케이스를 `report.json` 으로 정리하고 `build.py` 로 사람이 승인·반려할 A4 인쇄용 리포트를 만든다. 개조식 문체를 lint로 강제한다 |
+| `qa-report` | 화면 캡처와 케이스를 `report.json` 으로 정리하고 `build.py` 로 사람이 승인·반려할 A4 인쇄용 리포트를 만든다. 캡처 확대 보기와 전체 승인을 지원하고, 개조식 문체를 lint로 강제한다 |
 
 ### 학습 자료
 
