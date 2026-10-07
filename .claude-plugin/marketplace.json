@@ -5,13 +5,51 @@
     "url": "https://github.com/easydong19"
   },
   "description": "유동연의 Claude Code 스킬 모음 — 기술 문서 작성·리뷰, 데일리 스크럼, QA 리포트, 학습 자료 생성.",
+  "allowCrossMarketplaceDependenciesOn": ["diagram-design"],
   "plugins": [
     {
       "name": "dong-skills",
       "source": "./",
-      "description": "기술 문서 작성 파이프라인(유형 결정·구조 리뷰·문장 윤문·도메인 설명), 데일리 스크럼 메모, QA 리포트, 학습용 HTML·A4 요약본 스킬.",
+      "version": "0.4.0",
+      "description": "기술 문서 작성 파이프라인(유형 결정·구조 리뷰·문장 윤문·도메인 설명), 데일리 스크럼 메모, QA 리포트.",
+      "author": { "name": "Dongyeon Yu", "url": "https://github.com/easydong19" },
+      "homepage": "https://github.com/easydong19/dong-skills",
+      "repository": "https://github.com/easydong19/dong-skills",
+      "license": "MIT",
       "category": "productivity",
-      "keywords": ["skills", "technical-writing", "documentation", "daily-scrum", "qa-report", "study", "korean"]
+      "keywords": ["skills", "technical-writing", "documentation", "daily-scrum", "qa-report", "korean"],
+      "skills": [
+        "./skills/choosing-doc-type",
+        "./skills/doc-structure-review",
+        "./skills/doc-sentence-polish",
+        "./skills/explaining-with-domain-context",
+        "./skills/daily-scrum",
+        "./skills/qa-report"
+      ]
+    },
+    {
+      "name": "dong-study",
+      "source": "./",
+      "version": "0.4.0",
+      "description": "학습 자료 스킬 — 처음 보는 사람도 이해하는 학습용 HTML, 흑백 A4 한 장 요약본. A4 그림은 diagram-design 원칙으로 그린다.",
+      "author": { "name": "Dongyeon Yu", "url": "https://github.com/easydong19" },
+      "homepage": "https://github.com/easydong19/dong-skills",
+      "repository": "https://github.com/easydong19/dong-skills",
+      "license": "MIT",
+      "category": "productivity",
+      "keywords": ["skills", "study", "a4", "cheat-sheet", "korean"],
+      "skills": [
+        "./skills/study-explainer",
+        "./skills/a4-study-sheet"
+      ],
+      "dependencies": [
+        { "name": "diagram-design", "marketplace": "diagram-design" }
+      ]
+    },
+    {
+      "name": "dong-all",
+      "source": "./plugins/dong-all",
+      "description": "dong-skills와 dong-study를 한 번에 설치하는 묶음."
     }
   ]
 }

@@ -4,16 +4,31 @@ Claude Code용 스킬 모음입니다. 기술 문서를 쓰고 다듬는 파이�
 
 ## 설치
 
-Claude Code 플러그인 마켓플레이스로 설치합니다.
+플러그인 세 개로 나뉘어 있습니다. 필요한 것만 설치합니다.
+
+| 플러그인 | 스킬 | 의존성 |
+| --- | --- | --- |
+| `dong-skills` | 문서 작성 4종 · `daily-scrum` · `qa-report` | 없음 |
+| `dong-study` | `study-explainer` · `a4-study-sheet` | [diagram-design](https://github.com/cathrynlavery/diagram-design) (자동 설치) |
+| `dong-all` | 위 두 플러그인을 한 번에 | 위와 같음 |
 
 ```bash
 claude plugin marketplace add easydong19/dong-skills
 claude plugin install dong-skills@dong-skills
 ```
 
-설치하면 스킬은 `dong-skills:<스킬 이름>` 으로 불립니다. 대화 중 요청 내용이 스킬 설명과 맞으면 Claude가 자동으로 고릅니다.
+`dong-study`나 `dong-all`을 설치하려면 diagram-design 마켓플레이스를 **먼저** 추가합니다. Claude Code는 다른 마켓플레이스를 대신 추가해 주지 않으므로, 이 단계를 빼면 `Is the "diagram-design" marketplace added?` 오류로 설치가 멈춥니다.
 
-플러그인을 쓰지 않으려면 레포를 클론해 `skills/` 아래 폴더를 `~/.claude/skills/` 에 복사해도 됩니다.
+```bash
+claude plugin marketplace add cathrynlavery/diagram-design
+claude plugin install dong-study@dong-skills
+```
+
+diagram-design은 `dong-study`의 의존성으로 함께 설치됩니다. `a4-study-sheet`가 A4 요약에 그림을 넣을 때 이 스킬의 원칙을 불러 씁니다.
+
+설치하면 스킬은 `<플러그인>:<스킬 이름>`(예: `dong-skills:qa-report`, `dong-study:a4-study-sheet`)으로 불립니다. 대화 중 요청 내용이 스킬 설명과 맞으면 Claude가 자동으로 고릅니다.
+
+플러그인을 쓰지 않으려면 레포를 클론해 `skills/` 아래 폴더를 `~/.claude/skills/` 에 복사해도 됩니다. 이때 diagram-design은 직접 설치합니다.
 
 ## 스킬 목록
 
@@ -37,12 +52,12 @@ claude plugin install dong-skills@dong-skills
 | [`daily-scrum`](docs/skills/daily-scrum.md) | 그날의 커밋·PR을 비개발자도 읽을 수 있는 기능 단위 스크럼 메모로 만든다. 스크럼 테이블 셀에 바로 붙일 평문 형식 |
 | [`qa-report`](docs/skills/qa-report.md) | 화면 캡처와 케이스를 `report.json` 으로 정리하고 `build.py` 로 사람이 승인·반려할 A4 인쇄용 리포트를 만든다. 캡처 확대 보기와 전체 승인을 지원하고, 개조식 문체를 lint로 강제한다 |
 
-### 학습 자료
+### 학습 자료 (`dong-study`)
 
 | 스킬 | 무엇을 |
 | --- | --- |
 | [`study-explainer`](docs/skills/study-explainer.md) | 개념을 처음 보는 사람도 이해할 수 있게 배경·비유·그림을 채운 학습용 HTML |
-| [`a4-study-sheet`](docs/skills/a4-study-sheet.md) | 시험·면접 직전에 들고 볼 흑백 A4 1장 인쇄용 요약본 |
+| [`a4-study-sheet`](docs/skills/a4-study-sheet.md) | 시험·면접 직전에 들고 볼 흑백 A4 1장 인쇄용 요약본. 그림은 diagram-design 원칙으로 흑백 인라인 SVG로 그린다 |
 
 ## 구조
 
@@ -52,7 +67,8 @@ skills/qa-report/build.py     report.json → index.html 빌더 (표준 라이�
 skills/qa-report/example/     샘플 report.json과 가상 알림함 캡처 (PNG · GIF)
 docs/                         스킬별 사용 예시와 결과 이미지
 scripts/capture-docs.py       docs 예시 이미지 재생성 (playwright)
-.claude-plugin/               플러그인·마켓플레이스 매니페스트
+.claude-plugin/marketplace.json   마켓플레이스 · 플러그인 정의 (dong-skills · dong-study · dong-all)
+plugins/dong-all/             묶음 플러그인 (스킬 없이 의존성만)
 ```
 
 ## 라이선스

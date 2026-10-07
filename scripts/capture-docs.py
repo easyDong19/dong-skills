@@ -1,7 +1,7 @@
 """docs 예시 이미지를 다시 만든다.
 
     python scripts/capture-docs.py qa      # qa-report 예시 캡처(가상 알림함) + 리포트 스크린샷·GIF
-    python scripts/capture-docs.py study   # a4-study-sheet · study-explainer 스크린샷 (--a4, --explainer 로 원본 지정)
+    python scripts/capture-docs.py study   # a4-study-sheet · study-explainer 스크린샷 (--a4, --explainer, --a4-fig 로 원본 지정)
 
 필요: playwright(chromium), Pillow, Chrome(리포트 PDF), pdftoppm(PDF → PNG)
 """
@@ -140,15 +140,29 @@ def qa(p):
 
 # ---------------------------------------------------------------- study
 
-def study(p, a4: pathlib.Path, explainer: pathlib.Path):
-    b = p.chromium.launch()
-    print("a4-study-sheet")
+REDACT_JS = """words => {
+  const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  for (let n; (n = w.nextNode());) for (const x of words) n.nodeValue = n.nodeValue.split(x).join("");
+}"""
+
+
+def a4_first_page(b, src: pathlib.Path, out: pathlib.Path, redact=()):
     page = b.new_page(viewport={"width": 794, "height": 1123}, device_scale_factor=1.5)
-    page.goto(a4.as_uri())
+    page.goto(src.as_uri())
+    if redact:
+        page.evaluate(REDACT_JS, list(redact))
     page.emulate_media(media="print")
     page.wait_for_timeout(400)
     full = shot(page, full_page=True)
-    save_png(full.crop((0, 0, full.width, min(full.height, round(1123 * 1.5)))), IMG / "a4-study-sheet/sheet.png", width=900)
+    save_png(full.crop((0, 0, full.width, min(full.height, round(1123 * 1.5)))), out, width=900)
+
+
+def study(p, a4: pathlib.Path, explainer: pathlib.Path, a4_fig: pathlib.Path | None, redact):
+    b = p.chromium.launch()
+    print("a4-study-sheet")
+    a4_first_page(b, a4, IMG / "a4-study-sheet/sheet.png", redact)
+    if a4_fig:
+        a4_first_page(b, a4_fig, IMG / "a4-study-sheet/sheet-figures.png", redact)
 
     print("study-explainer")
     page = b.new_page(viewport={"width": 1180, "height": 800}, device_scale_factor=1)
@@ -171,6 +185,8 @@ def main():
     ap.add_argument("target", choices=["qa", "study"])
     ap.add_argument("--a4", type=pathlib.Path)
     ap.add_argument("--explainer", type=pathlib.Path)
+    ap.add_argument("--a4-fig", type=pathlib.Path, help="그림(인라인 SVG)이 들어간 A4 요약 HTML")
+    ap.add_argument("--redact", action="append", default=[], help="캡처 전에 화면에서 지울 문구 (회사명 등). 여러 번 줄 수 있다")
     a = ap.parse_args()
     with sync_playwright() as p:
         if a.target == "qa":
@@ -178,7 +194,7 @@ def main():
         else:
             if not (a.a4 and a.explainer):
                 ap.error("study 는 --a4 와 --explainer 가 필요하다")
-            study(p, a.a4.resolve(), a.explainer.resolve())
+            study(p, a.a4.resolve(), a.explainer.resolve(), a.a4_fig.resolve() if a.a4_fig else None, a.redact)
 
 
 if __name__ == "__main__":
