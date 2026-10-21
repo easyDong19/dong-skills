@@ -2,7 +2,7 @@
 
 Claude Code 없이 **ChatGPT나 Claude 채팅**에서 [`a4-study-sheet`](../skills/a4-study-sheet/SKILL.md) 스킬을 쓰도록 옮긴 버전이다. 공부한 내용을 시험·면접 직전에 들고 볼 흑백 A4 한 장 HTML로 만든다.
 
-> 기준: `skills/a4-study-sheet/SKILL.md` v0.4.1. 스킬을 고치면 이 파일도 함께 고친다.
+> 기준: `skills/a4-study-sheet/SKILL.md` v0.4.2. 스킬을 고치면 이 파일도 함께 고친다.
 
 ## 사용법
 
