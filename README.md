@@ -59,12 +59,15 @@ diagram-design은 `dong-study`의 의존성으로 함께 설치됩니다. `a4-st
 | [`study-explainer`](docs/skills/study-explainer.md) | 개념을 처음 보는 사람도 이해할 수 있게 배경·비유·그림을 채운 학습용 HTML |
 | [`a4-study-sheet`](docs/skills/a4-study-sheet.md) | 시험·면접 직전에 들고 볼 흑백 A4 1장 인쇄용 요약본. 그림은 diagram-design 원칙으로 흑백 인라인 SVG로 그린다 |
 
+**Claude Code 없이 쓰기:** ChatGPT나 Claude 채팅에서는 [`chat/a4-study-sheet.md`](chat/a4-study-sheet.md)의 지시문을 복사해 붙여 넣고 주제만 쓰면 됩니다.
+
 ## 구조
 
 ```
 skills/<스킬 이름>/SKILL.md   스킬 본문 (frontmatter의 description이 트리거 조건)
 skills/qa-report/build.py     report.json → index.html 빌더 (표준 라이브러리만 사용)
 skills/qa-report/example/     샘플 report.json과 가상 알림함 캡처 (PNG · GIF)
+chat/a4-study-sheet.md        ChatGPT·Claude 채팅에 붙여 넣는 a4-study-sheet 지시문
 docs/                         스킬별 사용 예시와 결과 이미지
 scripts/capture-docs.py       docs 예시 이미지 재생성 (playwright)
 .claude-plugin/marketplace.json   마켓플레이스 · 플러그인 정의 (dong-skills · dong-study · dong-all)
