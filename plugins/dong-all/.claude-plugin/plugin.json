@@ -1,6 +1,6 @@
 {
   "name": "dong-all",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "dong-skills와 dong-study를 한 번에 설치하는 묶음.",
   "author": { "name": "Dongyeon Yu", "url": "https://github.com/easydong19" },
   "license": "MIT",

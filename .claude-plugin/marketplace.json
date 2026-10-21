@@ -10,7 +10,7 @@
     {
       "name": "dong-skills",
       "source": "./",
-      "version": "0.4.0",
+      "version": "0.4.1",
       "description": "기술 문서 작성 파이프라인(유형 결정·구조 리뷰·문장 윤문·도메인 설명), 데일리 스크럼 메모, QA 리포트.",
       "author": { "name": "Dongyeon Yu", "url": "https://github.com/easydong19" },
       "homepage": "https://github.com/easydong19/dong-skills",
@@ -30,7 +30,7 @@
     {
       "name": "dong-study",
       "source": "./",
-      "version": "0.4.0",
+      "version": "0.4.1",
       "description": "학습 자료 스킬 — 처음 보는 사람도 이해하는 학습용 HTML, 흑백 A4 한 장 요약본. A4 그림은 diagram-design 원칙으로 그린다.",
       "author": { "name": "Dongyeon Yu", "url": "https://github.com/easydong19" },
       "homepage": "https://github.com/easydong19/dong-skills",
